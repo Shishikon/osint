@@ -22,9 +22,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 
-
-CSRF_TRUSTED_ORIGINS = ['https://' + host for host in os.environ.get('ALLOWED_HOSTS', '').split(',') if host]
-
+CSRF_TRUSTED_ORIGINS = [
+    'https://osint-osint.up.railway.app/',
+]
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 

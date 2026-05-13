@@ -10,7 +10,7 @@ class TelegramSearch(models.Model):
     searched_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.searched_username
+        return self.searched_username or "Unnamed"
 
 class GitHubSearch(models.Model):
 
@@ -27,4 +27,4 @@ class GitHubSearch(models.Model):
     searched_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.searched_username
+        return self.searched_username or "Unnamed"
