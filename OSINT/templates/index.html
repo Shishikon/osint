@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+{% load static %}
+<html class="no-js">
+
+<head>
+    <!-- Mobile Specific Meta -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Favicon-->
+    <link rel="" href="">
+    <!-- Author Meta -->
+    <meta name="獅子魂" content="">
+    <!-- Meta Description -->
+    <meta name="Open Source Intelligence" content="">
+    <!-- Meta Keyword -->
+    <meta name="keywords" content="">
+    <!-- meta character set -->
+    <meta charset="UTF-8">
+    <!-- Site Title -->
+    <title>獅子魂</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Poppins:400,300,500,600,700" rel="stylesheet">
+
+    <!--
+CSS
+============================================= -->
+
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/themify-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+
+</head>
+
+<body>
+
+<!-- Start Pre-loader-->
+
+<div id="loader-wrapper">
+    <div id="loader"></div>
+    <div class="loader-section section-left"></div>
+    <div class="loader-section section-right"></div>
+</div>
+
+<!--End Pre-loader-->
+
+<!-- Start header section -->
+{% include 'components/index/_header.html' %}
+<!-- End header section -->
+
+<!-- Start banner section -->
+{% include 'components/index/_banner.html' %}
+<!-- End banner section -->
+
+<!-- Start feature section -->
+{% include 'components/index/_feature.html' %}
+<!-- End feature section -->
+
+<!-- Start faq section -->
+{% include 'components/index/_faq.html' %}
+<!-- End faq section -->
+
+<!-- Start service section -->
+{% include 'components/index/_service.html' %}
+<!-- End service section -->
+
+
+<!-- Start footer section -->
+{% include 'components/index/_footer.html' %}
+<!-- End footer section -->
+
+<div class="scroll-top">
+    <i class="ti-angle-up"></i>
+</div>
+
+<!--
+JS
+============================================= -->
+<script src="{% static 'js/vendor/jquery-2.2.4.min.js' %}"></script>
+<script src="{% static 'js/vendor/popper.min.js' %}"></script>
+<script src="{% static 'js/jquery.easing.1.3.js' %}"></script>
+<script src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/jquery.parallax-scroll.js' %}"></script>
+<script src="{% static 'js/dopeNav.js' %}"></script>
+<script src="{% static 'js/owl.carousel.min.js' %}"></script>
+<script src="{% static 'js/waypoints.min.js' %}"></script>
+<script src="{% static 'js/jquery.stellar.min.js' %}"></script>
+<script src="{% static 'js/jquery.counterup.min.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+</body>
+
+</html>

@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="icon" type="image/x-icon" href="">
+    <title>
+        {% if username %}
+        {{username}}
+
+        {% else %}
+        Unknown
+        {% endif %}
+    </title>
+</head>
+<style>
+@import url('https://fonts.googleapis.com/css?family=Josefin+Sans|Josefin+Slab|Lobster');
+body {
+  background: #201c29;
+}
+.frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 400px;
+  height: 400px;
+  margin-top: -200px;
+  margin-left: -200px;
+  border-radius: 2px;
+  box-shadow: .5rem .5rem 1rem rgba(0, 0, 0, 0.6);
+  background: #643a7a;
+  color: #786450;
+  font-family: 'Josefin slab', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.flex {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.center {
+  height: 299px;
+  width: 320px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: .5rem .5rem 1rem rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.profile {
+
+  height: 320px;
+  text-align: center;
+}
+.profile .image {
+  position: relative;
+  width: 80px;
+  height: 70px;
+  margin: 38px auto 0 auto;
+}
+.profile .image .circle-1, .profile .image .circle-2 {
+  position: absolute;
+  box-sizing: border-box;
+  width: 76px;
+  height: 76px;
+  top: -3px;
+  left: -3px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #643a7a #643a7a #643a7a transparent;
+  border-radius: 50%;
+  transition: all 1.5s ease-in-out;
+}
+.circle-1 {
+  animation: circle-1 2s;
+}
+@keyframes circle-1 {
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+.profile .image .circle-2 {
+  width: 82px;
+  height: 82px;
+  top: -6px;
+  left: -6px;
+  border-color: #786450 transparent #786450 #786450;
+  animation: circle 2s;
+}
+@keyframes circle {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.profile .image img {
+  display: block;
+  border-radius: 50%;
+  background: #F5E8DF;
+}
+.profile .image:hover {
+  cursor: pointer;
+}
+.profile .image:hover .circle-1, .profile .image:hover .circle-2 {
+          transform: rotate(360deg);
+}
+.profile .image:hover .circle-2 {
+          transform: rotate(-360deg);
+}
+.profile .name {
+  font-size: 2rem;
+  margin-top: 20px;
+}
+.profile .job {
+  font-size: 1.2rem;
+  line-height: 15px;
+}
+svg {
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+#wave {
+  stroke-dasharray: 0 16 101 16;
+  animation: moveTheWave 2400ms linear infinite;
+}
+
+@keyframes moveTheWave {
+  0% {
+    stroke-dashoffset: 0;
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    stroke-dashoffset: -133;
+    transform: translate3d(-90px, 0, 0);
+  }
+}
+.profile .actions .btn {
+  display: block;
+  width: 80px;
+  height: 30px;
+  margin: 0 auto 10px auto;
+  background: none;
+  border: 2px solid transparent;
+  font-size: 1.1rem;
+  box-sizing: border-box;
+  color: #643a7a;
+}
+.btn, .parameter {
+  font-family: 'Josefin sans';
+}
+.profile .actions .btn:hover {
+  cursor: pointer;
+}
+
+.hvr-underline-from-center {
+  display: inline-block;
+  vertical-align: middle;
+  transform: perspective(1px) translateZ(0);
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0);
+  position: relative;
+  overflow: hidden;
+}
+.hvr-underline-from-center:before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 51%;
+  right: 51%;
+  bottom: 0;
+  background: #643a7a;
+  height: 1px;
+  transition-property: left, right;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-out;
+}
+.hvr-underline-from-center:hover:before, .hvr-underline-from-center:focus:before, .hvr-underline-from-center:active:before {
+  left: 0;
+  right: 0;
+}
+
+
+
+</style>
+
+<body>
+
+
+<div class="frame flex d-flex justify-content-center">
+    <div class="center ">
+
+        <div class="profile">
+            <div class="image">
+                <div class="circle-1"></div>
+                <div class="circle-2"></div>
+
+                {% if img %}
+                <img src="{{img}}"
+                     alt="Jessica Potter" width="70" height="70">
+                {% else %}
+                <img src="https://yt3.ggpht.com/ytc/AKedOLRVoyiuNXTmwrQ3OSC8n3lb_zBlwUfVWyVAlYi2=s900-c-k-c0x00ffffff-no-rj"
+                     alt="unknown" width="70" height="70">
+                {% endif %}
+
+            </div>
+
+            {% if username %}
+            <div class="name">{{username}}</div>
+            {% else %}
+            <div class="name">User not found</div>
+            {% endif %}
+
+            {% if description %}
+            <div class="job">{{description}}</div>
+            {% else %}
+            <div class="job">Description not found</div>
+            {% endif %}
+
+
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     width="40px" height="30px"
+                     viewBox="5 0 80 60">
+                    <path id="wave"
+                          fill="none"
+                          stroke="#262626"
+                          stroke-width="2"
+                          stroke-linecap="round">
+                    </path>
+                </svg>
+            </div>
+
+
+            <div class="actions">
+
+                {% if contact %}
+                <a target="_blank" class="btn hvr-underline-from-center" href="{{contact}}">Contact</a>
+                {% else %}
+                <h6>Contact not found</h6>
+                {% endif %}
+
+                {% if img %}
+                <a target="_blank" class="btn hvr-underline-from-center" href="{{img}}">Image</a>
+                {% else %}
+                <h6>Image not found</h6>
+                {% endif %}
+
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<script>
+    const path = document.querySelector('#wave');
+const animation = document.querySelector('#moveTheWave');
+const m = 0.512286623256592433;
+
+function buildWave(w, h) {
+
+  const a = h / 4;
+  const y = h / 2;
+
+  const pathData = [
+    'M', w * 0, y + a / 2,
+    'c',
+      a * m, 0,
+      -(1 - a) * m, -a,
+      a, -a,
+    's',
+      -(1 - a) * m, a,
+      a, a,
+    's',
+      -(1 - a) * m, -a,
+      a, -a,
+    's',
+      -(1 - a) * m, a,
+      a, a,
+    's',
+      -(1 - a) * m, -a,
+      a, -a,
+
+    's',
+      -(1 - a) * m, a,
+      a, a,
+    's',
+      -(1 - a) * m, -a,
+      a, -a,
+    's',
+      -(1 - a) * m, a,
+      a, a,
+    's',
+      -(1 - a) * m, -a,
+      a, -a,
+    's',
+      -(1 - a) * m, a,
+      a, a,
+    's',
+      -(1 - a) * m, -a,
+      a, -a,
+    's',
+      -(1 - a) * m, a,
+      a, a,
+    's',
+      -(1 - a) * m, -a,
+      a, -a,
+    's',
+      -(1 - a) * m, a,
+      a, a,
+    's',
+      -(1 - a) * m, -a,
+      a, -a
+  ].join(' ');
+
+  path.setAttribute('d', pathData);
+}
+
+buildWave(90, 60);
+
+
+</script>
+</body>

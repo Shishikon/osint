@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSINT // {{ username }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:       #080b0f;
+      --surface:  #0d1117;
+      --border:   #1c2333;
+      --border2:  #243044;
+      --found:    #00ff88;
+      --found-bg: rgba(0,255,136,0.06);
+      --notfound: #ff4466;
+      --notfound-bg: rgba(255,68,102,0.06);
+      --error:    #ff9900;
+      --error-bg: rgba(255,153,0,0.06);
+      --redirect: #33aaff;
+      --redirect-bg: rgba(51,170,255,0.06);
+      --dim:      #3d4f6b;
+      --muted:    #5a7090;
+      --text:     #c9d6e8;
+      --mono: 'JetBrains Mono', monospace;
+      --display: 'Syne', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--mono);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: linear-gradient(var(--border) 1px, transparent 1px),
+                        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none; z-index: 0; opacity: 0.3;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
+    }
+    .glow { position: fixed; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(0,255,136,0.05) 0%, transparent 70%); top: -250px; left: 50%; transform: translateX(-50%); pointer-events: none; z-index: 0; }
+    .wrapper { position: relative; z-index: 1; max-width: 1300px; margin: 0 auto; padding: 0 32px 80px; }
+
+    /* HEADER */
+    .site-header { display: flex; align-items: center; justify-content: space-between; padding: 28px 0 24px; border-bottom: 1px solid var(--border); margin-bottom: 52px; }
+    .logo { font-family: var(--display); font-size: 0.9rem; font-weight: 800; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text); }
+    .logo span { color: var(--found); }
+    .header-right { font-size: 0.68rem; color: var(--muted); letter-spacing: 0.1em; }
+
+    /* HERO */
+    .hero { margin-bottom: 44px; opacity: 0; animation: fadeDown 0.5s ease 0.1s forwards; }
+    @keyframes fadeDown { from { opacity:0; transform:translateY(-14px); } to { opacity:1; transform:translateY(0); } }
+    .live-tag { display: inline-flex; align-items: center; gap: 8px; font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--found); margin-bottom: 14px; }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--found); animation: blink 1.2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+    .hero-title { font-family: var(--display); font-size: clamp(2.6rem, 5vw, 4.2rem); font-weight: 800; letter-spacing: -0.03em; color: #e8eef7; line-height: 1.05; }
+    .hero-title .at { color: var(--muted); font-weight: 400; }
+    .hero-title .uname { color: var(--found); }
+    .hero-sub { font-size: 0.75rem; color: var(--muted); margin-top: 10px; letter-spacing: 0.05em; }
+
+    /* STATS BAR */
+    .stats-bar { display: flex; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--surface); margin-bottom: 36px; opacity: 0; animation: fadeUp 0.5s ease 0.25s forwards; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .stat { flex: 1; padding: 18px 24px; border-right: 1px solid var(--border); position: relative; }
+    .stat:last-child { border-right: none; }
+    .stat::after { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+    .stat-all::after   { background: var(--dim); }
+    .stat-found::after { background: var(--found); }
+    .stat-miss::after  { background: var(--notfound); }
+    .stat-err::after   { background: var(--error); }
+    .stat-redir::after { background: var(--redirect); }
+    .stat-num { font-family: var(--display); font-size: 1.9rem; font-weight: 800; line-height: 1; }
+    .stat-all   .stat-num { color: var(--text); }
+    .stat-found .stat-num { color: var(--found); }
+    .stat-miss  .stat-num { color: var(--notfound); }
+    .stat-err   .stat-num { color: var(--error); }
+    .stat-redir .stat-num { color: var(--redirect); }
+    .stat-lbl { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted); margin-top: 3px; }
+
+    /* CONTROLS */
+    .controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 22px; opacity: 0; animation: fadeUp 0.5s ease 0.35s forwards; }
+    .fbtn { padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); cursor: pointer; transition: all 0.2s; }
+    .fbtn:hover { border-color: var(--found); color: var(--found); }
+    .fbtn.on       { background: rgba(0,255,136,0.08); border-color: var(--found);    color: var(--found); }
+    .fbtn.on.miss  { background: var(--notfound-bg);   border-color: var(--notfound); color: var(--notfound); }
+    .fbtn.on.err   { background: var(--error-bg);      border-color: var(--error);    color: var(--error); }
+    .fbtn.on.redir { background: var(--redirect-bg);   border-color: var(--redirect); color: var(--redirect); }
+    .search { margin-left: auto; padding: 7px 14px; background: var(--surface); border: 1px solid var(--border2); border-radius: 8px; font-family: var(--mono); font-size: 0.75rem; color: var(--text); outline: none; width: 210px; transition: border-color 0.2s; }
+    .search::placeholder { color: var(--dim); }
+    .search:focus { border-color: var(--found); }
+    .sorter { padding: 7px 12px; background: var(--surface); border: 1px solid var(--border2); border-radius: 8px; font-family: var(--mono); font-size: 0.68rem; color: var(--muted); outline: none; cursor: pointer; }
+
+    /* COUNT LINE */
+    .count-line { font-size: 0.68rem; color: var(--dim); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 18px; }
+    .count-line b { color: var(--text); font-weight: 400; }
+
+    /* GRID */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 10px; }
+
+    /* CARD BASE */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s, opacity 0.25s;
+      opacity: 0;
+      animation: cardIn 0.35s ease forwards;
+    }
+    @keyframes cardIn { from { opacity:0; transform:translateY(6px) scale(0.985); } to { opacity:1; transform:translateY(0) scale(1); } }
+    .card::before { content:''; position:absolute; top:0; left:0; bottom:0; width:3px; border-radius:3px 0 0 3px; }
+
+    /* CARD VARIANTS */
+    .card-found    { border-color: rgba(0,255,136,0.2); }
+    .card-found::before { background: var(--found); }
+    .card-found::after  { content:''; position:absolute; top:0; right:0; width:100px; height:100px; background: radial-gradient(circle at top right, rgba(0,255,136,0.06), transparent 70%); pointer-events:none; }
+    .card-found:hover   { border-color: rgba(0,255,136,0.55); box-shadow: 0 0 30px rgba(0,255,136,0.08), 0 4px 20px rgba(0,0,0,0.5); transform: translateY(-2px); }
+
+    .card-notfound { border-color: rgba(255,68,102,0.1); opacity: 0.6 !important; }
+    .card-notfound::before { background: var(--notfound); }
+    .card-notfound:hover   { border-color: rgba(255,68,102,0.4); opacity: 1 !important; transform: translateY(-2px); }
+
+    .card-error { border-color: rgba(255,153,0,0.12); }
+    .card-error::before { background: var(--error); }
+    .card-error:hover   { border-color: rgba(255,153,0,0.45); box-shadow: 0 0 24px rgba(255,153,0,0.07); transform: translateY(-2px); }
+
+    .card-redirect { border-color: rgba(51,170,255,0.12); }
+    .card-redirect::before { background: var(--redirect); }
+    .card-redirect:hover   { border-color: rgba(51,170,255,0.45); transform: translateY(-2px); }
+
+    /* Scan line */
+    .scan-line { position:absolute; bottom:0; left:3px; right:0; height:1px; background:linear-gradient(90deg, var(--found), transparent); opacity:0; transform:scaleX(0); transform-origin:left; transition:opacity 0.3s, transform 0.45s; }
+    .card-found:hover .scan-line { opacity:0.7; transform:scaleX(1); }
+
+    /* CARD INNER */
+    .card-top  { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+    .card-left { display:flex; align-items:center; gap:9px; min-width:0; }
+    .fav { width:26px; height:26px; border-radius:6px; background:var(--border); display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:700; color:var(--muted); flex-shrink:0; overflow:hidden; font-family:var(--display); }
+    .fav img { width:100%; height:100%; object-fit:cover; border-radius:4px; display:block; }
+    .pname { font-family:var(--display); font-size:0.9rem; font-weight:700; color:#dce8f5; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:170px; }
+    .badge { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:6px; font-size:0.62rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; flex-shrink:0; }
+    .bdot { width:4px; height:4px; border-radius:50%; background:currentColor; }
+    .b-found    { background:var(--found-bg);    color:var(--found);    border:1px solid rgba(0,255,136,0.3); }
+    .b-notfound { background:var(--notfound-bg); color:var(--notfound); border:1px solid rgba(255,68,102,0.25); }
+    .b-error    { background:var(--error-bg);    color:var(--error);    border:1px solid rgba(255,153,0,0.25); }
+    .b-redirect { background:var(--redirect-bg); color:var(--redirect); border:1px solid rgba(51,170,255,0.25); }
+    .card-url { font-size:0.67rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:12px; }
+    .card-url a { color:inherit; text-decoration:none; transition:color 0.2s; }
+    .card-found .card-url a:hover { color:var(--found); }
+    .card-meta { display:flex; align-items:center; justify-content:space-between; }
+    .hcode { font-size:0.7rem; font-weight:700; letter-spacing:0.06em; padding:3px 8px; border-radius:5px; }
+    .h200 { background:rgba(0,255,136,0.1);  color:var(--found); }
+    .h3xx { background:rgba(51,170,255,0.1); color:var(--redirect); }
+    .h4xx { background:rgba(255,68,102,0.1); color:var(--notfound); }
+    .herr { background:rgba(255,153,0,0.1);  color:var(--error); }
+    .open-btn { display:inline-flex; align-items:center; gap:5px; font-size:0.65rem; letter-spacing:0.08em; text-transform:uppercase; padding:4px 11px; border-radius:6px; border:1px solid var(--border2); color:var(--muted); text-decoration:none; transition:all 0.2s; }
+    .card-found .open-btn:hover { border-color:var(--found); color:var(--found); background:var(--found-bg); }
+    .dead-lbl { font-size:0.65rem; color:var(--dim); letter-spacing:0.06em; }
+
+    /* EMPTY */
+    .empty { grid-column:1/-1; text-align:center; padding:60px; border:1px dashed var(--border2); border-radius:16px; color:var(--muted); font-size:0.82rem; }
+
+    /* FOOTER */
+    .footer { margin-top:56px; padding-top:24px; border-top:1px solid var(--border); display:flex; justify-content:space-between; font-size:0.65rem; color:var(--dim); letter-spacing:0.08em; }
+    .footer a { color:var(--muted); text-decoration:none; transition:color 0.2s; }
+    .footer a:hover { color:var(--found); }
+
+    .hidden { display: none !important; }
+
+    @media(max-width:768px){
+      .wrapper{padding:0 16px 60px}
+      .stats-bar{flex-wrap:wrap}
+      .stat{flex:1 1 40%}
+      .search{width:100%}
+      .grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="wrapper">
+
+  <header class="site-header">
+    <div class="logo">OSINT<span>//</span>TRACE</div>
+    <div class="header-right">{{ results|length }} platform{{ results|length|pluralize }} scanned</div>
+  </header>
+
+  <div class="hero">
+    <div class="live-tag"><span class="live-dot"></span> Scan complete</div>
+    <h1 class="hero-title"><span class="at">@</span><span class="uname">{{ username }}</span></h1>
+    <p class="hero-sub">Digital footprint analysis &middot; {{ results|length }} source{{ results|length|pluralize }} checked</p>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat stat-all">
+      <div class="stat-num" id="cnt-all">{{ results|length }}</div>
+      <div class="stat-lbl">Scanned</div>
+    </div>
+    <div class="stat stat-found">
+      <div class="stat-num" id="cnt-found">—</div>
+      <div class="stat-lbl">Found</div>
+    </div>
+    <div class="stat stat-miss">
+      <div class="stat-num" id="cnt-miss">—</div>
+      <div class="stat-lbl">Not Found</div>
+    </div>
+    <div class="stat stat-err">
+      <div class="stat-num" id="cnt-err">—</div>
+      <div class="stat-lbl">Error</div>
+    </div>
+    <div class="stat stat-redir">
+      <div class="stat-num" id="cnt-redir">—</div>
+      <div class="stat-lbl">Redirect</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="fbtn on"    data-f="all">All</button>
+    <button class="fbtn"       data-f="found">Found</button>
+    <button class="fbtn miss"  data-f="notfound">Not Found</button>
+    <button class="fbtn err"   data-f="error">Error</button>
+    <button class="fbtn redir" data-f="redirect">Redirect</button>
+    <select class="sorter" id="sorter">
+      <option value="default">Sort: Default</option>
+      <option value="found-first">Found First</option>
+      <option value="az">A → Z</option>
+      <option value="status">By Status Code</option>
+    </select>
+    <input class="search" id="search" type="text" placeholder="/ search platforms…">
+  </div>
+
+  <div class="count-line">Showing <b id="vis-count">{{ results|length }}</b> of {{ results|length }} results</div>
+
+  <footer class="footer">
+    <a href="/">← New search</a>
+    <span>OSINT//TRACE &middot; @{{ username }}</span>
+  </footer>
+
+  <div class="grid" id="grid">
+
+    {% for result in results %}
+
+    {% if result.status == "FOUND" %}
+    <div class="card card-found" data-cat="found" data-status="{{ result.status }}" data-url="{{ result.url }}">
+      <div class="card-top">
+        <div class="card-left">
+          <div class="fav">?</div>
+          <div class="pname">{{ result.url }}</div>
+        </div>
+        <span class="badge b-found"><span class="bdot"></span>Found</span>
+      </div>
+      <div class="card-url"><a href="{{ result.url }}" target="_blank" rel="noopener noreferrer">{{ result.url }}</a></div>
+      <div class="card-meta">
+        <span class="hcode h200">HTTP 200</span>
+        <a class="open-btn" href="{{ result.url }}" target="_blank" rel="noopener noreferrer">Open ↗</a>
+      </div>
+      <div class="scan-line"></div>
+    </div>
+
+
+
+    {% elif result.status == "NOT FOUND" %}
+    <div class="card card-notfound" data-cat="notfound" data-status="{{ result.status }}" data-url="{{ result.url }}">
+      <div class="card-top">
+        <div class="card-left">
+          <div class="fav">?</div>
+          <div class="pname">{{ result.url }}</div>
+        </div>
+        <span class="badge b-notfound"><span class="bdot"></span>Not Found</span>
+      </div>
+      <div class="card-url">{{ result.url }}</div>
+      <div class="card-meta">
+        <span class="hcode h4xx">HTTP {{ result.status }}</span>
+        <span class="dead-lbl">No profile</span>
+      </div>
+    </div>
+
+    {% elif result.status == "ERROR" %}
+    <div class="card card-notfound" data-cat="notfound" data-status="{{ result.status }}" data-url="{{ result.url }}">
+      <div class="card-top">
+        <div class="card-left">
+          <div class="fav">?</div>
+          <div class="pname">{{ result.url }}</div>
+        </div>
+        <span class="badge b-notfound"><span class="bdot"></span>Error</span>
+      </div>
+      <div class="card-url">{{ result.url }}</div>
+      <div class="card-meta">
+        <span class="hcode h4xx">HTTP {{ result.status }}</span>
+        <span class="dead-lbl">No profile</span>
+      </div>
+    </div>
+
+    {% else %}
+    <div class="card card-error" data-cat="error" data-status="{{ result.status }}" data-url="{{ result.url }}">
+      <div class="card-top">
+        <div class="card-left">
+          <div class="fav">?</div>
+          <div class="pname">{{ result.url }}</div>
+        </div>
+        {% if result.status == 0 %}
+        <span class="badge b-error"><span class="bdot"></span>Timeout</span>
+        {% else %}
+        <span class="badge b-error"><span class="bdot"></span>Error</span>
+        {% endif %}
+      </div>
+      <div class="card-url">{{ result.url }}</div>
+      <div class="card-meta">
+        {% if result.status == 0 %}
+        <span class="hcode herr">TIMEOUT</span>
+        {% else %}
+        <span class="hcode herr">HTTP {{ result.status }}</span>
+        {% endif %}
+        <span class="dead-lbl">Unreachable</span>
+      </div>
+    </div>
+
+    {% endif %}
+
+    {% empty %}
+    <div class="empty">No results returned for <strong>@{{ username }}</strong>.</div>
+    {% endfor %}
+
+  </div><!-- /grid -->
+</div>
+
+<script>
+(function () {
+  const grid  = document.getElementById('grid');
+  const cards = Array.from(grid.querySelectorAll('.card'));
+  const visEl = document.getElementById('vis-count');
+
+  // Stagger animation
+  cards.forEach((c, i) => { c.style.animationDelay = `${i * 45}ms`; });
+
+  // Favicon + clean platform name
+  cards.forEach(card => {
+    const rawUrl = card.dataset.url || '';
+    const favEl  = card.querySelector('.fav');
+    const nameEl = card.querySelector('.pname');
+    if (!rawUrl) return;
+
+    let hostname = rawUrl;
+    try { hostname = new URL(rawUrl).hostname.replace(/^www\./, ''); } catch (e) {}
+
+    const shortName = hostname.split('.')[0];
+    const display   = shortName.charAt(0).toUpperCase() + shortName.slice(1);
+
+    if (nameEl) nameEl.textContent = display;
+
+    if (favEl) {
+      const img = new Image();
+      img.src = 'https://www.google.com/s2/favicons?domain=' + hostname + '&sz=32';
+      img.alt = '';
+      img.onload  = () => { favEl.textContent = ''; favEl.appendChild(img); };
+      img.onerror = () => { favEl.textContent = display.charAt(0); };
+    }
+  });
+
+  // Count per category
+  const counts = { found: 0, notfound: 0, error: 0, redirect: 0 };
+  cards.forEach(c => { const cat = c.dataset.cat; if (cat in counts) counts[cat]++; });
+  document.getElementById('cnt-found').textContent = counts.found;
+  document.getElementById('cnt-miss').textContent  = counts.notfound;
+  document.getElementById('cnt-err').textContent   = counts.error;
+  document.getElementById('cnt-redir').textContent = counts.redirect;
+
+  // Filter / search / sort
+  let activeFilter = 'all', query = '', sortMode = 'default';
+
+  function run() {
+    let list = [...cards];
+
+    if (sortMode === 'found-first') {
+      list.sort((a, b) => (a.dataset.cat === 'found' ? 0 : 1) - (b.dataset.cat === 'found' ? 0 : 1));
+    } else if (sortMode === 'az') {
+      list.sort((a, b) => (a.querySelector('.pname')?.textContent || '').localeCompare(b.querySelector('.pname')?.textContent || ''));
+    } else if (sortMode === 'status') {
+      list.sort((a, b) => parseInt(a.dataset.status || 0) - parseInt(b.dataset.status || 0));
+    }
+
+    list.forEach((c, i) => { c.style.animationDelay = `${i * 25}ms`; grid.appendChild(c); });
+
+    let vis = 0;
+    list.forEach(card => {
+      const cat  = card.dataset.cat;
+      const url  = (card.dataset.url || '').toLowerCase();
+      const name = (card.querySelector('.pname')?.textContent || '').toLowerCase();
+      const ok   = (activeFilter === 'all' || cat === activeFilter) && (!query || url.includes(query) || name.includes(query));
+      card.classList.toggle('hidden', !ok);
+      if (ok) vis++;
+    });
+    visEl.textContent = vis;
+  }
+
+  document.querySelectorAll('.fbtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      activeFilter = btn.dataset.f;
+      run();
+    });
+  });
+
+  document.getElementById('search').addEventListener('input', e => {
+    query = e.target.value.toLowerCase().trim();
+    run();
+  });
+
+  document.getElementById('sorter').addEventListener('change', e => {
+    sortMode = e.target.value;
+    run();
+  });
+})();
+</script>
+</body>
+</html>

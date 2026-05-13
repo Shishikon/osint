@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>GitHub OSINT — {{ username }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #09090c;
+      --surface:   #111116;
+      --surface2:  #18181f;
+      --border:    #222230;
+      --border2:   #2e2e40;
+      --accent:    #4ade80;
+      --accent2:   #22c55e;
+      --dim:       #3d3d55;
+      --muted:     #6b7280;
+      --text:      #e2e8f0;
+      --text2:     #94a3b8;
+      --danger:    #f87171;
+      --mono:      'JetBrains Mono', monospace;
+      --display:   'Syne', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* grid texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(74,222,128,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74,222,128,.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* glow blob */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 500px;
+      background: radial-gradient(ellipse at center, rgba(74,222,128,.07) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* ── header ── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 48px;
+      animation: fadeDown .5s ease both;
+    }
+
+    .logo-mark {
+      width: 36px;
+      height: 36px;
+      border: 1.5px solid var(--accent);
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      color: var(--accent);
+    }
+
+    .logo-text {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -.02em;
+      color: var(--text);
+    }
+
+    .logo-text span { color: var(--accent); }
+
+    .header-tag {
+      margin-left: auto;
+      font-size: 10px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border2);
+      padding: 4px 10px;
+      border-radius: 100px;
+    }
+
+    /* ── profile hero ── */
+    .profile-hero {
+      display: flex;
+      gap: 32px;
+      align-items: flex-start;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+      animation: fadeUp .5s .1s ease both;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: .6;
+    }
+
+    .avatar-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 2px solid var(--border2);
+      display: block;
+    }
+
+    .avatar-placeholder {
+      width: 100px;
+      height: 100px;
+      border-radius: 12px;
+      background: var(--surface2);
+      border: 2px solid var(--border2);
+      display: grid;
+      place-items: center;
+      color: var(--dim);
+      font-size: 36px;
+    }
+
+    .avatar-badge {
+      position: absolute;
+      bottom: -6px;
+      right: -6px;
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 50%;
+      border: 3px solid var(--surface);
+    }
+
+    .profile-info { flex: 1; min-width: 0; }
+
+    .profile-names {
+      margin-bottom: 6px;
+    }
+
+    .profile-fullname {
+      font-family: var(--display);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.1;
+    }
+
+    .profile-username {
+      font-size: 13px;
+      color: var(--accent);
+      margin-top: 2px;
+    }
+
+    .profile-username::before { content: '@ '; opacity: .5; }
+
+    .profile-bio {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.7;
+      margin: 12px 0;
+      max-width: 520px;
+    }
+
+    .missing { color: var(--dim); font-style: italic; }
+
+    .profile-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 14px;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text2);
+    }
+
+    .meta-icon {
+      width: 14px;
+      height: 14px;
+      opacity: .5;
+      flex-shrink: 0;
+    }
+
+    .profile-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 16px;
+      font-size: 12px;
+      color: var(--accent);
+      text-decoration: none;
+      border: 1px solid var(--border2);
+      padding: 7px 14px;
+      border-radius: 8px;
+      transition: background .2s, border-color .2s;
+    }
+
+    .profile-link:hover {
+      background: rgba(74,222,128,.08);
+      border-color: var(--accent);
+    }
+
+    /* ── stats grid ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+      animation: fadeUp .5s .2s ease both;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+
+    .stat-card:hover { border-color: var(--border2); }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+      opacity: 0;
+      transition: opacity .3s;
+    }
+
+    .stat-card:hover::after { opacity: .4; }
+
+    .stat-label {
+      font-size: 10px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-family: var(--display);
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .stat-value.missing-val {
+      font-size: 16px;
+      color: var(--dim);
+      font-family: var(--mono);
+      font-weight: 400;
+    }
+
+    /* ── info rows ── */
+    .info-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      animation: fadeUp .5s .3s ease both;
+    }
+
+    .info-panel-header {
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border);
+      font-size: 10px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info-panel-header::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-block;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: center;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      gap: 16px;
+      transition: background .15s;
+    }
+
+    .info-row:last-child { border-bottom: none; }
+    .info-row:hover { background: var(--surface2); }
+
+    .info-key {
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      width: 110px;
+      flex-shrink: 0;
+    }
+
+    .info-sep {
+      color: var(--dim);
+      font-size: 12px;
+    }
+
+    .info-val {
+      font-size: 13px;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .info-val.missing { color: var(--dim); }
+
+    /* ── footer ── */
+    footer {
+      margin-top: 48px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--dim);
+      animation: fadeUp .5s .4s ease both;
+    }
+
+    /* ── animations ── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── responsive ── */
+    @media (max-width: 600px) {
+      .profile-hero { flex-direction: column; gap: 20px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .profile-fullname { font-size: 20px; }
+    }
+
+    @media (max-width: 400px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- header -->
+  <header>
+    <div class="logo-mark">⌖</div>
+    <div class="logo-text">git<span>scout</span></div>
+    <div class="header-tag">OSINT report</div>
+  </header>
+
+  <!-- profile hero -->
+  <div class="profile-hero">
+    <div class="avatar-wrap">
+      {% if avatar %}
+        <img class="avatar" src="{{ avatar }}" alt="{{ username }} avatar">
+      {% else %}
+        <div class="avatar-placeholder">?</div>
+      {% endif %}
+      <div class="avatar-badge"></div>
+    </div>
+
+    <div class="profile-info">
+      <div class="profile-names">
+        <div class="profile-fullname">
+          {% if fullname %}{{ fullname }}{% else %}<span class="missing">Name unavailable</span>{% endif %}
+        </div>
+        <div class="profile-username">
+          {% if username %}{{ username }}{% else %}<span class="missing">—</span>{% endif %}
+        </div>
+      </div>
+
+      <div class="profile-bio">
+        {% if bio %}{{ bio }}{% else %}<span class="missing">No bio provided.</span>{% endif %}
+      </div>
+
+      <div class="profile-meta">
+        {% if location %}
+        <div class="meta-item">
+          <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 21c-4-4-7-7.5-7-11a7 7 0 1114 0c0 3.5-3 7-7 11z"/><circle cx="12" cy="10" r="2"/>
+          </svg>
+          {{ location }}
+        </div>
+        {% endif %}
+        {% if organization %}
+        <div class="meta-item">
+          <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="7" width="20" height="15" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
+          </svg>
+          {{ organization }}
+        </div>
+        {% endif %}
+      </div>
+
+      {% if link %}
+      <a class="profile-link" href="{{ link }}" target="_blank" rel="noopener">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+        View on GitHub
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Followers</div>
+      {% if followers_count %}
+        <div class="stat-value">{{ followers_count }}</div>
+      {% else %}
+        <div class="stat-value missing-val">—</div>
+      {% endif %}
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Following</div>
+      {% if following_count %}
+        <div class="stat-value">{{ following_count }}</div>
+      {% else %}
+        <div class="stat-value missing-val">—</div>
+      {% endif %}
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Repositories</div>
+      {% if repos %}
+        <div class="stat-value">{{ repos }}</div>
+      {% else %}
+        <div class="stat-value missing-val">—</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- detail rows -->
+  <div class="info-panel">
+    <div class="info-panel-header">Raw intelligence</div>
+
+    <div class="info-row">
+      <span class="info-key">Full name</span>
+      <span class="info-sep">//</span>
+      <span class="info-val {% if not fullname %}missing{% endif %}">
+        {% if fullname %}{{ fullname }}{% else %}not found{% endif %}
+      </span>
+    </div>
+
+    <div class="info-row">
+      <span class="info-key">Username</span>
+      <span class="info-sep">//</span>
+      <span class="info-val {% if not username %}missing{% endif %}">
+        {% if username %}{{ username }}{% else %}not found{% endif %}
+      </span>
+    </div>
+
+    <div class="info-row">
+      <span class="info-key">Avatar</span>
+      <span class="info-sep">//</span>
+      <span class="info-val">
+        {% if avatar %}
+          <a href="{{ avatar }}" target="_blank" style="color:var(--accent);text-decoration:none;">{{ avatar }}</a>
+        {% else %}
+          <span class="missing">not found</span>
+        {% endif %}
+      </span>
+    </div>
+
+    <div class="info-row">
+      <span class="info-key">Location</span>
+      <span class="info-sep">//</span>
+      <span class="info-val {% if not location %}missing{% endif %}">
+        {% if location %}{{ location }}{% else %}not found{% endif %}
+      </span>
+    </div>
+
+    <div class="info-row">
+      <span class="info-key">Organization</span>
+      <span class="info-sep">//</span>
+      <span class="info-val {% if not organization %}missing{% endif %}">
+        {% if organization %}{{ organization }}{% else %}not found{% endif %}
+      </span>
+    </div>
+
+    <div class="info-row">
+      <span class="info-key">Profile URL</span>
+      <span class="info-sep">//</span>
+      <span class="info-val">
+        {% if link %}
+          <a href="{{ link }}" target="_blank" style="color:var(--accent);text-decoration:none;">{{ link }}</a>
+        {% else %}
+          <span class="missing">not found</span>
+        {% endif %}
+      </span>
+    </div>
+
+  </div>
+
+  <footer>
+    gitscout · data sourced from GitHub public API · for research use only
+  </footer>
+
+</div>
+</body>
+</html>

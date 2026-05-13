@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Instagram Detail</title>
+</head>
+
+<body>
+
+<main>
+
+    {% if username %}
+    <div>
+        <h3>
+            {{username}}
+        </h3>
+    </div>
+
+    {% else %}
+    <div>
+        <h3>
+            Username not found
+        </h3>
+    </div>
+    {% endif %}
+
+
+    {% if description %}
+    <div>
+        <h3>
+            {{description}}
+        </h3>
+    </div>
+
+    {% else %}
+    <div>
+        <h3>
+            Description not found
+        </h3>
+    </div>
+    {% endif %}
+
+
+    {% if avatar %}
+    <div>
+        <a target="_blank" href="{{avatar}}">Avatar Image</a>
+    </div>
+
+    {% else %}
+    <div>
+        <h3>Avatar image not found</h3>
+    </div>
+    {% endif %}
+
+
+    {% if posts %}
+    <div>
+        <h3>
+            {{posts}}
+        </h3>
+    </div>
+
+    {% else %}
+    <div>
+        <h3>
+            Posts not found
+        </h3>
+    </div>
+    {% endif %}
+
+
+    {% if followers %}
+    <div>
+        <h3>
+            {{followers}}
+        </h3>
+    </div>
+
+    {% else %}
+    <div>
+        <h3>
+            Followers not found
+        </h3>
+    </div>
+    {% endif %}
+
+
+
+    {% if following %}
+    <div>
+        <h3>
+            {{following}}
+        </h3>
+    </div>
+
+    {% else %}
+    <div>
+        <h3>
+            Follows data not found
+        </h3>
+    </div>
+    {% endif %}
+
+</main>
+
+</body>
+
+</html>
