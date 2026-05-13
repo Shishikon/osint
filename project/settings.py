@@ -22,6 +22,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 
+
+CSRF_TRUSTED_ORIGINS = ['https://' + host for host in os.environ.get('ALLOWED_HOSTS', '').split(',') if host]
+
+
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
