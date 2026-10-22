@@ -8,26 +8,26 @@
 
 ---
 
-## ✨ Features
+##  Features
 
 ### 🌐 Web Surfer
 - Enter any username and the app searches **49 platforms** simultaneously
 - Returns **Found** with a direct link or **Not Found** for each platform
 - Platforms include social media, forums, developer sites, and more
 
-### 💬 Telegram Lookup
+###  Telegram Lookup
 - Enter a Telegram username
 - App scrapes and parses publicly available information about that user
 - Results are **saved to the database** for future reference
 
-### 🐙 GitHub Lookup
+###  GitHub Lookup
 - Enter a GitHub username
 - App fetches and parses public profile data, repositories, and activity
 - Results are **saved to the database** for future reference
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -40,7 +40,7 @@
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 - Python 3.10+
@@ -74,7 +74,7 @@ Then open [http://localhost:8000](http://localhost:8000) in your browser.
 
 ---
 
-## ⚙️ Environment Variables
+##  Environment Variables
 
 Set these in your hosting dashboard or a `.env` file:
 
@@ -89,7 +89,7 @@ DJANGO_SUPERUSER_EMAIL=admin@example.com
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 osint/
@@ -104,7 +104,7 @@ osint/
 
 ---
 
-## 🖼️ How It Works
+##  How It Works
 
 ### Web Surfer
 1. User enters a username
@@ -119,13 +119,13 @@ osint/
 
 ---
 
-## ⚠️ Disclaimer
+##  Disclaimer
 
 This tool is intended for **educational and ethical research purposes only**. Only publicly available information is accessed. Always respect privacy laws and platform terms of service.
 
 ---
 
-## 👨‍💻 Author
+##  Author
 
 **Shishikon** — Trilingual Python Developer
 - GitHub: [@Shishikon](https://github.com/Shishikon)
