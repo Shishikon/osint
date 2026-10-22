@@ -130,8 +130,3 @@ This tool is intended for **educational and ethical research purposes only**. On
 **Shishikon** — Trilingual Python Developer
 - GitHub: [@Shishikon](https://github.com/Shishikon)
 
----
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
