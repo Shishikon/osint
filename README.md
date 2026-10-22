@@ -1,16 +1,16 @@
-# 🔍 OSINT
+#  OSINT
 
 > An open-source intelligence tool — search usernames across the web, dig into Telegram and GitHub profiles, and uncover publicly available information in seconds.
 
 ![OSINT](https://github.com/user-attachments/assets/34c4e205-45b4-49ba-844c-ae1b418b2204)
 
-🌐 **Live Demo:** [osint-osint.up.railway.app](https://osint-osint.up.railway.app)
+ **Live Demo:** [osint-osint.up.railway.app](https://osint-osint.up.railway.app)
 
 ---
 
 ##  Features
 
-### 🌐 Web Surfer
+###  Web Surfer
 - Enter any username and the app searches **49 platforms** simultaneously
 - Returns **Found** with a direct link or **Not Found** for each platform
 - Platforms include social media, forums, developer sites, and more
@@ -109,7 +109,7 @@ osint/
 ### Web Surfer
 1. User enters a username
 2. App checks the username across **49 platforms**
-3. Returns a list with ✅ Found (with link) or ❌ Not Found for each platform
+3. Returns a list with  Found (with link) or  Not Found for each platform
 
 ### Telegram & GitHub Lookup
 1. User enters a username
